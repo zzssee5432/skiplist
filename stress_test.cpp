@@ -11,11 +11,13 @@
 #include <cstdlib>
 #include <pthread.h>
 #include <time.h>
-#include "../skiplist.h"
-
+#include "myskiplist.h"
+#include<string>
+using namespace std;
 #define NUM_THREADS 1
 #define TEST_COUNT 100000
-SkipList<int, std::string> skipList(18);
+
+skiplist<int, std::string> skipList(15);
 
 void *insertElement(void* threadid) {
     long tid; 
@@ -72,36 +74,33 @@ int main() {
         std::chrono::duration<double> elapsed = finish - start;
         std::cout << "insert elapsed:" << elapsed.count() << std::endl;
     }
-    // skipList.displayList();
+   
+         pthread_t threads[NUM_THREADS];
+         int rc;
+         int i;
+        auto start = std::chrono::high_resolution_clock::now();
 
-    // {
-    //     pthread_t threads[NUM_THREADS];
-    //     int rc;
-    //     int i;
-    //     auto start = std::chrono::high_resolution_clock::now();
+         for( i = 0; i < NUM_THREADS; i++ ) {
+             std::cout << "main() : creating thread, " << i << std::endl;
+            rc = pthread_create(&threads[i], NULL, getElement, (void *)i);
 
-    //     for( i = 0; i < NUM_THREADS; i++ ) {
-    //         std::cout << "main() : creating thread, " << i << std::endl;
-    //         rc = pthread_create(&threads[i], NULL, getElement, (void *)i);
+             if (rc) {
+                 std::cout << "Error:unable to create thread," << rc << std::endl;
+                 exit(-1);
+             }
+         }
 
-    //         if (rc) {
-    //             std::cout << "Error:unable to create thread," << rc << std::endl;
-    //             exit(-1);
-    //         }
-    //     }
+        void *ret;
+         for( i = 0; i < NUM_THREADS; i++ ) {
+             if (pthread_join(threads[i], &ret) !=0 )  {
+                 perror("pthread_create() error"); 
+                exit(3);
+             }
+         }
 
-    //     void *ret;
-    //     for( i = 0; i < NUM_THREADS; i++ ) {
-    //         if (pthread_join(threads[i], &ret) !=0 )  {
-    //             perror("pthread_create() error"); 
-    //             exit(3);
-    //         }
-    //     }
-
-    //     auto finish = std::chrono::high_resolution_clock::now(); 
-    //     std::chrono::duration<double> elapsed = finish - start;
-    //     std::cout << "get elapsed:" << elapsed.count() << std::endl;
-    // }
+         auto finish = std::chrono::high_resolution_clock::now(); 
+         std::chrono::duration<double> elapsed = finish - start;
+         std::cout << "get elapsed:" << elapsed.count() << std::endl;
 
 	pthread_exit(NULL);
     return 0;

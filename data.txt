@@ -1,0 +1,7 @@
+aaac    f
+aabs    b
+aac    e
+abc    a
+abcc    g
+bacd    c
+def    d
